@@ -6,6 +6,8 @@
 
 Trabajo Final Vision por Computadora III
 
+
+
 ## Project Organization
 
 ```
@@ -57,5 +59,21 @@ Trabajo Final Vision por Computadora III
     └── plots.py                <- Code to create visualizations
 ```
 
+## Data preprocessing
+
+### 🖥️ Método 1: Notebook `aq-data-processing.ipynb`
+
+#### Pasos de Ejecución
+1. Abrir el notebook en Jupyter:
+2. Modificar la variable requerida para leer la ubicación de los archivos zip del dataset cocotext.
+3. ejecutar la notebook
+4. se generaran carpetas en la carpeta `data` (relativa a la ubicación del notebook) con los archivos procesados.
+
+### 🖥️ Método 2: Desde submódulo vp3_proyecto ejecutar script `data/dataset_split.py`
+
+#### Pasos de Ejecución
+1. Setear variables de entorno en archivo .env en la raiz del submódulo (vpc3-proyecto)
+2. ejecutar python -m `vpc3_proyecto.data.dataset_split`
+3. se generaran carpetas en la carpeta indicada en la variable de entorno `PROCESSED_DATA_DIR` con las imagenes divididas en subdirectorios segun la proporción indicada.
 --------
 

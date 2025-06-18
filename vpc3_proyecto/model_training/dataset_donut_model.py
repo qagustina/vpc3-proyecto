@@ -4,15 +4,18 @@ from PIL import Image
 from torch.utils.data import Dataset
 import torch
 
+from vpc3_proyecto.data.utils import load_annotations
+
 
 class DonutTextDatasetFromCocoTextV2Raw(Dataset):
-    def __init__(self, image_dir, ann_file, processor, max_length=512):
+    def __init__(self, image_dir, ann_zip_file, processor, max_length=512):
         self.image_dir = image_dir
         self.processor = processor
         self.max_length = max_length
-
-        with open(ann_file, "r") as f:
-            coco_data = json.load(f)
+        # exists = os.path.exists(ann_zip_file)
+        # if not exists:
+        #     raise ValueError(f"El archivo de anotaciones {ann_zip_file} no existe.")
+        coco_data = load_annotations(ann_zip_file)
 
         self.anns = coco_data["anns"]
         self.imgs = coco_data["imgs"]
