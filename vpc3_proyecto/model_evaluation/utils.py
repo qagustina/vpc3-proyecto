@@ -48,7 +48,7 @@ def save_results(metrics, predictions, references, save_path):
     print(f"Results saved to {save_path}")
 
 
-def manual_evaluate(model, dataset, processor, max_samples=None,save_path=None):
+def manual_evaluate(model, dataset, processor, max_samples=None, results_save_path=None):
     model.eval()
     predictions, references = [], []
     max_samples = max_samples or len(dataset)
@@ -123,13 +123,13 @@ def manual_evaluate(model, dataset, processor, max_samples=None,save_path=None):
         "correct_empty_predictions": correct_empty_predictions
     }
     # Save results if path provided
-    if save_path:
+    if results_save_path:
         full_results = {
             "metrics": metrics,
             "sample_details": sample_details,
             "errors": error_samples
         }
-        save_results(full_results, save_path)
+        save_results(full_results, results_save_path)
 
     return metrics
 # Usage

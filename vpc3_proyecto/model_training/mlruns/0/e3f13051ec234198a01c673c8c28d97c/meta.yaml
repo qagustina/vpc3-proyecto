@@ -1,0 +1,15 @@
+artifact_uri: file:///home/juan/CEIA/vpc3-proyecto/vpc3_proyecto/model_training/mlruns/0/e3f13051ec234198a01c673c8c28d97c/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: e3f13051ec234198a01c673c8c28d97c
+run_name: /home/juan/CEIA/vpc3-proyecto/vpc3_proyecto/models/donut-finetuned-coco2014
+run_uuid: e3f13051ec234198a01c673c8c28d97c
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1750285194289
+status: 1
+tags: []
+user_id: juan
