@@ -67,6 +67,6 @@ class DonutTextDatasetFromCocoTextV2Raw(Dataset):
         labels[labels == self.processor.tokenizer.pad_token_id] = -100
         return {
             "pixel_values": pixel_values,
-            "labels": labels
+            "labels": labels,
+            "img_path": img_path
         }
-
