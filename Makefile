@@ -79,3 +79,48 @@ export PRINT_HELP_PYSCRIPT
 
 help:
 	@$(PYTHON_INTERPRETER) -c "${PRINT_HELP_PYSCRIPT}" < $(MAKEFILE_LIST)
+
+#################################################################################
+# === NUEVAS REGLAS PARA ENTRENAMIENTO Y EVALUACIÓN ===
+#################################################################################
+
+PYTHON=python
+SCRIPTS_DIR=scripts
+
+TRAIN_SCRIPT=$(SCRIPTS_DIR)/train.py
+INFER_SCRIPT=$(SCRIPTS_DIR)/infer.py
+EVAL_SCRIPT=$(SCRIPTS_DIR)/eval_model.py
+ATTN_SCRIPT=$(SCRIPTS_DIR)/attention_viz.py
+
+MODEL_TYPE?=trocr
+TRAIN_DATA?=data/processed/train
+VAL_DATA?=data/processed/val
+OUTPUT_DIR?=models/finetuned_model
+BASE_MODEL?=microsoft/trocr-base-handwritten
+IMAGE_PATH?=sample.jpg
+MODEL_PATH?=$(OUTPUT_DIR)
+TEXT_PATH?=sample.txt
+
+train:
+	$(PYTHON) $(TRAIN_SCRIPT) \
+		--model $(MODEL_TYPE) \
+		--train-data $(TRAIN_DATA) \
+		--val-data $(VAL_DATA) \
+		--output $(OUTPUT_DIR) \
+		--base-model $(BASE_MODEL)
+
+infer:
+	$(PYTHON) $(INFER_SCRIPT) \
+		--model-path $(MODEL_PATH) \
+		--image-path $(IMAGE_PATH)
+
+eval:
+	$(PYTHON) $(EVAL_SCRIPT) \
+		--model-path $(MODEL_PATH) \
+		--val-data $(VAL_DATA)
+
+attention:
+	$(PYTHON) $(ATTN_SCRIPT) \
+		--model-path $(MODEL_PATH) \
+		--image-path $(IMAGE_PATH) \
+		--text-path $(TEXT_PATH)
