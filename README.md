@@ -1,13 +1,34 @@
-# Proyecto VPC3
-## Integrantes: Agustina QUIROS - Agustín De La VEGA - Juan Cruz PIÑERO - Florentino ARIAS
-### Modelos: TrOCR y Donut
-### Dataset: COCO-Text
+#  Trabajo Final - Visión por Computadora III (CEIA)
+
+###  Integrantes
+
+- Florentino Arias  
+- Juan Cruz Piñero  
+- Agustina Quiros  
+- Agustín de la Vega  
+
+### Traducción de Imágenes a Texto 
+Aplicación de modelos de OCR sobre el dataset COCO-Text.
+Este proyecto explora la capacidad de modelos de OCR basados en transformers para transcribir texto presente en imágenes naturales. Se comparan dos enfoques:  
+- **TrOCR**, orientado a la transcripción directa de texto en regiones específicas.  
+- **Donut**, diseñado para el entendimiento estructurado de documentos completos.
+
+Se trabajó con el dataset **COCO-Text**, realizando un proceso de *fine-tuning* y evaluación basado en métricas como **Mean Character Accuracy** y **Character Error Rate**.
+
+#### 🖼️Dataset: [Coco-Text dataset](https://bgshih.github.io/cocotext/)
+
+#### 🤗 Modelos Utilizados
+
+- [TrOCR](https://huggingface.co/microsoft/trocr-base-handwritten)
+
+- [Donut](https://huggingface.co/naver-clova-ix/donut-base)
+
+
 
 <a target="_blank" href="https://cookiecutter-data-science.drivendata.org/">
     <img src="https://img.shields.io/badge/CCDS-Project%20template-328F97?logo=cookiecutter" />
 </a>
 
-Trabajo Final Vision por Computadora III - 2doBim2025
 
 ## Project Organization
 
