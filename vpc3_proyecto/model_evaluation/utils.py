@@ -86,16 +86,20 @@ def manual_evaluate(model, dataset, processor, max_samples=None, results_save_pa
             # Record sample details
             sample_details.append({
                 "id": i,
-                "prediction": pred_text.strip() if pred_text else None,
-                "reference": true_text.strip() if true_text else None,
-                "is_empty": not true_text
+                "prediction": pred_text.lower().strip() if pred_text else None,
+                "ground_truth": true_text.lower().strip() if true_text else None,
+                "cer": cer(true_text.lower().strip(), pred_text.lower().strip()) if true_text else float('nan'),
+                "wer": wer(true_text.lower().strip(), pred_text.lower().strip()) if true_text else float('nan'),
+                "edit_distance" : levenshtein_distance(pred_text.lower().strip(), true_text.lower().strip()),
+                "is_empty": not true_text,
+                "char_accuracy": character_accuracy(pred_text.lower().strip(), true_text.lower().strip())
             })
 
             if not true_text:
-                empty_reference_count += 1
-                if not pred_text:
-                    correct_empty_predictions += 1
-                continue  # Skip jiwer calculation for empty references
+                    empty_reference_count += 1
+                    if not pred_text:
+                        correct_empty_predictions += 1
+                    continue  # Skip jiwer calculation for empty references
 
             predictions.append(pred_text.strip())
             references.append(true_text.strip())
@@ -111,17 +115,14 @@ def manual_evaluate(model, dataset, processor, max_samples=None, results_save_pa
         # Periodic cleanup
         if i % 10 == 0:
             torch.cuda.empty_cache()
-
-    # Calculate standard metrics (only non-empty references)
+    results_df = pd.DataFrame(sample_details)
     metrics = {
-        "cer": cer(references, predictions) if references else float('nan'),
-        "wer": wer(references, predictions) if references else float('nan'),
-        "samples_evaluated": len(references) + empty_reference_count,
-        "empty_reference_accuracy": correct_empty_predictions / empty_reference_count if empty_reference_count > 0 else float(
-            'nan'),
-        "empty_references": empty_reference_count,
-        "correct_empty_predictions": correct_empty_predictions
+        'mean_char_accuracy': results_df['char_accuracy'].mean(),
+        'mean_cer': results_df['edit_distance'].mean() / results_df['ground_truth'].str.len().mean(),
+        'exact_match_rate': (results_df['edit_distance'] == 0).mean(),
+        'total_samples': len(results_df)
     }
+
     # Save results if path provided
     if results_save_path:
         full_results = {
@@ -129,9 +130,12 @@ def manual_evaluate(model, dataset, processor, max_samples=None, results_save_pa
             "sample_details": sample_details,
             "errors": error_samples
         }
-        save_results(full_results, results_save_path)
+        try:
+            save_results(full_results,predictions,references, results_save_path)
+        except Exception as e:
+            print(f"Error saving results: {str(e)}")
 
-    return metrics
+    return metrics,results_df
 # Usage
 
 import os
@@ -168,3 +172,34 @@ def get_last_checkpoint_folder(output_dir):
     except Exception as e:
         print(f"Error finding checkpoints: {str(e)}")
         return None
+
+
+import pandas as pd
+from typing import Dict, List, Tuple, Optional, Union
+
+
+def levenshtein_distance(s1: str, s2: str) -> int:
+    """Calculate Levenshtein distance between two strings."""
+    if len(s1) < len(s2):
+        return levenshtein_distance(s2, s1)
+    if len(s2) == 0:
+        return len(s1)
+
+    previous_row = range(len(s2) + 1)
+    for i, c1 in enumerate(s1):
+        current_row = [i + 1]
+        for j, c2 in enumerate(s2):
+            insertions = previous_row[j + 1] + 1
+            deletions = current_row[j] + 1
+            substitutions = previous_row[j] + (c1 != c2)
+            current_row.append(min(insertions, deletions, substitutions))
+        previous_row = current_row
+    return previous_row[-1]
+
+
+def character_accuracy(predicted: str, ground_truth: str) -> float:
+    """Calculate character-level accuracy."""
+    if len(ground_truth) == 0:
+        return 1.0 if len(predicted) == 0 else 0.0
+    edit_distance = levenshtein_distance(predicted, ground_truth)
+    return 1.0 - (edit_distance / len(ground_truth))
