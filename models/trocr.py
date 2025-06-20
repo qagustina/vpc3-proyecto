@@ -59,7 +59,7 @@ class TrOCRDataset(BaseOCRDataset):
 class TrOCRModel(BaseOCRModel):
     """TrOCR model implementation using HuggingFace Transformers."""
     
-    def __init__(self, model_name: str = "microsoft/trocr-base-printed"):
+    def __init__(self, model_name: str = "microsoft/trocr-base-handwritten"):
         super().__init__(model_name)
         self.cer_metric = evaluate.load("cer")
     

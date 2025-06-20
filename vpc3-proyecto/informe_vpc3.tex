@@ -12,7 +12,7 @@
 \usepackage{multicol}  % Permite columnas
 \usepackage{hyperref}
 \usepackage{float}
-
+\usepackage{booktabs}
 
 
 % Márgenes personalizados
@@ -32,7 +32,7 @@
 % Imagen arriba del título
 \begin{figure}[t]
     \centering
-    \includegraphics[width=0.8\textwidth]{../reports/figures/ubalogo.png}
+    \includegraphics[width=0.8\textwidth]{../reports/figures/logoFIUBA.pdf}
 \end{figure}
 
 % Título y subtítulo personalizados
@@ -225,22 +225,31 @@ A continuación se detallan imagenes que ilustran como el modelo realiza el proc
 
 \subsection{Métricas}
 
-Se evaluaron los modelos Donut y TrOCR sobre el conjunto de datos de test, a continuación se detallan los resultados
-obtenidos:
+El Character Error Rate (CER) es una métrica utilizada para evaluar el rendimiento 
+de modelos de reconocimiento óptico de caracteres (OCR). Representa la proporción
+de caracteres que fueron incorrectamente reconocidos, calculada como la suma de 
+inserciones, eliminaciones y sustituciones necesarias para transformar la 
+predicción en la transcripción correcta, dividida por la cantidad total de 
+caracteres de referencia. Un valor de CER más bajo indica un mejor desempeño 
+del modelo.
 
+
+A continuación, se detalla la tabla de la comparación los modelos Donut y TrOCR sobre el conjunto de datos de test:
 \begin{table}[h!]
 \centering
-\begin{tabular}{|l|c|c|}
+\begin{tabular}{|l|l|l|l|c|c|c|}
 \hline
-\textbf{Model} & \textbf{Mean Character Accuracy} & \textbf{Mean Character Error Rate} \\
+\textbf{Modelo}  & \textbf{Entrada} & \textbf{Salida} & 
+\textbf{Accuracy} & \textbf{CER} & \textbf{Exact Match} \\
 \hline
-Donut & - & - \\
-TrOCR & 0.6717 &  0.3283 \\
+TrOCR & Imagen recortada & Texto plano & 0.6717 & 0.3283 & 0.4726 \\
+Donut & Imagen completa & JSON estructurado & 0.1795 & 0.8909 & 0.0706 \\
 \hline
 \end{tabular}
-\caption{Resultados de evaluación de los modelos Donut y TrOCR.}
-\label{tab:donut-results}
+\caption{Comparación entre los modelos TrOCR y Donut.}
+\label{tab:model-comparison}
 \end{table}
+
 
 \subsection{Análisis de los resultados}
 
@@ -251,9 +260,9 @@ TrOCR & 0.6717 &  0.3283 \\
 \textbf{TrOCR} & \textbf{Donut} \\
 \hline
 \begin{itemize}
-    \item CER promedio: ~3.4\%
+    \item CER promedio: ~32.8\%
     \item Predicciones precisas en recortes bien centrados y legibles
-    \item Sensible a ruido o recortes mal alineados
+    \item Sensible a ruido o palabras rotadas
 \end{itemize}
 &
 \begin{itemize}
