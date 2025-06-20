@@ -8,6 +8,7 @@ dataset, and configuration specific to the Transformers TrOCR architecture.
 import os
 import torch
 import pandas as pd
+import numpy as np
 from typing import Dict, List, Tuple, Optional
 from PIL import Image
 from transformers import (
@@ -193,4 +194,123 @@ class TrOCRModel(BaseOCRModel):
             generated_ids = self.model.generate(pixel_values, max_length=128)
         
         prediction = self.processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
-        return prediction 
+        return prediction
+    
+    def get_attention_maps(self, image_path: str, model_path: Optional[str] = None) -> Dict:
+        """
+        Generate attention maps for visualization.
+        
+        Returns:
+            Dict containing:
+                - prediction: The predicted text
+                - attention_maps: List of 2D attention weight arrays (one per token)
+                - tokens: List of generated tokens
+        """
+        if model_path:
+            self.load_model(model_path)
+        elif self.model is None:
+            self.load_model()
+        
+        # Load and process image
+        image = Image.open(image_path).convert("RGB")
+        pixel_values = self.processor(images=image, return_tensors="pt").pixel_values
+        pixel_values = pixel_values.to(self.device)
+        
+        self.model.eval()
+        
+        # Generate with attention output
+        with torch.no_grad():
+            # Get encoder outputs first
+            encoder_outputs = self.model.encoder(pixel_values=pixel_values)
+            
+            # Generate tokens step by step to collect attention
+            generated_ids = []
+            attention_weights_list = []
+            decoder_input_ids = torch.tensor([[self.model.config.decoder_start_token_id]], device=self.device)
+            
+            for step in range(128):  # Max length
+                # Forward pass through decoder
+                decoder_outputs = self.model.decoder(
+                    input_ids=decoder_input_ids,
+                    encoder_hidden_states=encoder_outputs.last_hidden_state,
+                    output_attentions=True,
+                    return_dict=True
+                )
+                
+                # Get next token
+                logits = decoder_outputs.logits[:, -1, :]
+                next_token_id = torch.argmax(logits, dim=-1)
+                
+                # Stop if EOS token
+                if next_token_id.item() == self.processor.tokenizer.eos_token_id:
+                    break
+                
+                # Extract cross-attention weights (decoder attending to encoder)
+                # decoder_outputs.cross_attentions contains attention weights for each layer
+                # We'll use the last layer's attention
+                if decoder_outputs.cross_attentions:
+                    # Shape: [batch_size, num_heads, sequence_length, encoder_sequence_length]
+                    cross_attention = decoder_outputs.cross_attentions[-1]  # Last layer
+                    
+                    # Average across heads and take the last token's attention
+                    token_attention = cross_attention[0, :, -1, :].mean(dim=0)  # [encoder_sequence_length]
+                    
+                    # Convert to 2D spatial attention map
+                    # TrOCR encoder creates a 2D grid of patches from the image
+                    attention_2d = self._reshape_attention_to_spatial(token_attention, encoder_outputs.last_hidden_state.shape[1])
+                    attention_weights_list.append(attention_2d.cpu().numpy())
+                
+                # Append token and update input
+                generated_ids.append(next_token_id.item())
+                decoder_input_ids = torch.cat([decoder_input_ids, next_token_id.unsqueeze(1)], dim=1)
+        
+        # Decode tokens to text
+        prediction = self.processor.tokenizer.decode(generated_ids, skip_special_tokens=True)
+        
+        # Decode individual tokens for visualization
+        tokens = [self.processor.tokenizer.decode([token_id], skip_special_tokens=True) 
+                  for token_id in generated_ids]
+        
+        return {
+            'prediction': prediction,
+            'attention_maps': attention_weights_list,
+            'tokens': tokens
+        }
+    
+    def _reshape_attention_to_spatial(self, attention_1d: torch.Tensor, num_patches: int) -> torch.Tensor:
+        """
+        Reshape 1D attention weights to 2D spatial grid.
+        
+        Args:
+            attention_1d: 1D attention weights [num_patches]
+            num_patches: Total number of patches
+            
+        Returns:
+            2D attention map
+        """
+        # For TrOCR, we need to figure out the spatial dimensions
+        # The model uses ViT-like patch encoding, typically creating a roughly square grid
+        
+        # Calculate grid dimensions (assuming roughly square)
+        grid_size = int(np.sqrt(num_patches))
+        
+        # Handle case where not perfectly square
+        if grid_size * grid_size != num_patches:
+            # Try to find best rectangular dimensions
+            for h in range(1, int(np.sqrt(num_patches)) + 1):
+                if num_patches % h == 0:
+                    w = num_patches // h
+                    if abs(h - w) <= 2:  # Prefer roughly square
+                        grid_size_h, grid_size_w = h, w
+                        break
+            else:
+                # Fallback to square with padding/truncation
+                grid_size_h = grid_size_w = grid_size
+                attention_1d = attention_1d[:grid_size * grid_size]
+        else:
+            grid_size_h = grid_size_w = grid_size
+        
+        # Reshape to 2D
+        attention_2d = attention_1d[:grid_size_h * grid_size_w].reshape(grid_size_h, grid_size_w)
+        
+        return attention_2d 
