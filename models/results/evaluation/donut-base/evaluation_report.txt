@@ -1,0 +1,14 @@
+OCR Model Evaluation Report
+==================================================
+Total Samples: 1572
+Mean Character Accuracy: 0.0000
+Mean Character Error Rate (CER): 1.0000
+Exact Match Rate: 0.0000
+
+Detailed Statistics:
+Character Accuracy Statistics:
+  Min: 0.0000
+  Max: 0.0000
+  Std: 0.0000
+  25th percentile: 0.0000
+  75th percentile: 0.0000

@@ -1,10 +1,7 @@
 import os
-import json
-import zipfile
-from collections import defaultdict
 from PIL import Image, ImageDraw
 import matplotlib.pyplot as plt
-from eda import load_anns, group_anns, get_imgs, get_id
+from vpc3_proyecto.eda import load_anns, group_anns, get_imgs, get_id
 
 
 def get_imgs(id_to_filename: dict, img_folder: str, cant: int = 10):
@@ -73,8 +70,8 @@ def plot_class_examples(anns_imgs, id_to_filename, img_folder, img_class, output
 def main(subset_folder: str):
     zip_path = '../data/raw/cocotext.v2.zip'
     json_file = 'cocotext.v2.json'
-    img_folder = os.path.join('../data/raw/subset', subset_folder)
-    output_path = '../reports/figures'
+    img_folder = os.path.join('../../data/raw/subset', subset_folder)
+    output_path = '../../reports/figures'
 
     coco_text = load_anns(zip_path, json_file)
     anns_imgs = group_anns(coco_text)
