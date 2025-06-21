@@ -109,8 +109,8 @@ def character_accuracy(predicted: str, ground_truth: str) -> float:
 
 def evaluate_predictions(predictions: List[str], ground_truths: List[str]) -> Dict:
     """Calculate evaluation metrics for predictions vs ground truths."""
-    if len(predictions) != len(ground_truths) or len(predictions) == 0 or len(ground_truths) == 0:
-        raise ValueError("Predictions and ground truths must have the same length differnte from zero")
+    if len(predictions) != len(ground_truths):
+        raise ValueError("Predictions and ground truths must have the same length")
     
     results = []
     for pred, gt in zip(predictions, ground_truths):

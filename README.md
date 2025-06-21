@@ -30,8 +30,6 @@ Se trabajó con el dataset **COCO-Text**, realizando un proceso de *fine-tuning*
 </a>
 
 
-
-
 ## Project Organization
 
 ```
@@ -83,4 +81,5 @@ Se trabajó con el dataset **COCO-Text**, realizando un proceso de *fine-tuning*
     └── plots.py                <- Code to create visualizations
 ```
 
+--------
 
