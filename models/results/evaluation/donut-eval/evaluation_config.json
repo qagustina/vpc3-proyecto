@@ -1,0 +1,10 @@
+{
+  "model_type": "donut",
+  "test_data": "vpc3_proyecto/data/processed/val2014",
+  "model_path": "vpc3_proyecto/models/finetuned_donut_weights/checkpoint-9267/manually-saved",
+  "use_pretrained": false,
+  "base_model": null,
+  "batch_size": 1,
+  "save_predictions": true,
+  "timestamp": "2025-06-20T13:13:45.388862"
+}
