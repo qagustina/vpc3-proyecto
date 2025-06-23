@@ -1,7 +1,30 @@
 import os
 from PIL import Image, ImageDraw
 import matplotlib.pyplot as plt
-from vpc3_proyecto.eda import load_anns, group_anns, get_imgs, get_id
+import zipfile
+from collections import defaultdict
+import json
+
+
+def load_anns(zip_path: str, json_file: str):
+    with zipfile.ZipFile(zip_path, 'r') as zipf:
+        with zipf.open(json_file) as file:
+            return json.load(file)
+
+
+def group_anns(coco_dict: dict):
+    anns = defaultdict(list)
+    for ann in coco_dict['anns'].values():
+        anns[ann['image_id']].append(ann)
+    return anns
+
+
+def get_id(coco_dict: dict, subset: str = 'train'):
+    return {
+        int(k): v['file_name']
+        for k, v in coco_dict['imgs'].items()
+        if v['set'] == subset
+    }
 
 
 def get_imgs(id_to_filename: dict, img_folder: str, cant: int = 10):
@@ -39,6 +62,7 @@ def plot_examples(img_list: list, anotaciones_por_imagen: dict, nombre_subset: s
     output_path = os.path.join(output_folder, f'visualization_{nombre_subset}.png')
     plt.savefig(output_path)
 
+
 def plot_class_examples(anns_imgs, id_to_filename, img_folder, img_class, output_path):
     img_ok = False
     for img_id, anns in anns_imgs.items():
@@ -66,6 +90,7 @@ def plot_class_examples(anns_imgs, id_to_filename, img_folder, img_class, output
             break  
     if not img_ok:
         print(f"No se encontró ninguna imagen con anotaciones {img_class}.")
+
 
 def main(subset_folder: str):
     zip_path = '../data/raw/cocotext.v2.zip'
